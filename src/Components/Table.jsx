@@ -4,7 +4,7 @@ import CreateContext from '../context/CreateContext';
 function Table() {
   const context = useContext(CreateContext);
   const { filtered, handleChange, input,
-    setInput, filteredNumber, handleClick } = context;
+    setInput, filteredNumber, handleClick, selectedOptions } = context;
 
   return (
     <>
@@ -64,6 +64,15 @@ function Table() {
         >
           Filtrar
         </button>
+      </div>
+      <div>
+        {
+          selectedOptions.map((option, index) => (
+            <div key={ index }>
+              { `${option.column} ${option.comparison} ${option.numberInput}` }
+            </div>
+          ))
+        }
       </div>
 
       <table>

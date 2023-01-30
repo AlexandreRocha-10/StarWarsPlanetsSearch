@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import CreateContext from './CreateContext';
 
+const columnOptions = ['population', 'orbital_period', 'diameter',
+  'rotation_period', 'surface_water'];
+
 function PlanetProvider({ children }) {
   const [apiInfos, setApiInfos] = useState([]);
   const [input, setInput] = useState('');
+  const [selectedOptions, setselectedOptions] = useState([]);
+  const [deletedOption, setdeletedOption] = useState([...columnOptions]);
   const [filteredNumber, setFilteredNumber] = useState({
     column: 'population',
     comparison: 'maior que',
@@ -34,34 +39,53 @@ function PlanetProvider({ children }) {
   };
 
   const handleClick = () => {
+    let planetsFiltered = filteredNumber.numberFilter.length
+      ? [...filteredNumber.numberFilter]
+      : [...filtered];
     if (filteredNumber.comparison === 'maior que') {
-      const fil = filtered.filter((planet) => (
+      planetsFiltered = planetsFiltered.filter((planet) => (
         +planet[filteredNumber.column] > +filteredNumber.numberInput
       ));
       setFilteredNumber({
         ...filteredNumber,
         buttonClick: true,
-        numberFilter: fil,
+        numberFilter: planetsFiltered,
       });
     } else if (filteredNumber.comparison === 'menor que') {
-      const fil = filtered.filter((planet) => (
+      planetsFiltered = planetsFiltered.filter((planet) => (
         +planet[filteredNumber.column] < +filteredNumber.numberInput
       ));
       setFilteredNumber({
         ...filteredNumber,
         buttonClick: true,
-        numberFilter: fil,
+        numberFilter: planetsFiltered,
       });
     } else {
-      const fil = filtered.filter((planet) => (
+      planetsFiltered = planetsFiltered.filter((planet) => (
         +planet[filteredNumber.column] === +filteredNumber.numberInput
       ));
       setFilteredNumber({
         ...filteredNumber,
         buttonClick: true,
-        numberFilter: fil,
+        numberFilter: planetsFiltered,
       });
     }
+
+    setselectedOptions([
+      { column: filteredNumber.column,
+        comparison: filteredNumber.comparison,
+        numberInput: filteredNumber.numberInput }, ...selectedOptions,
+    ]);
+
+    const updateFilteredPlanets = deletedOption
+      .filter((options) => options !== filteredNumber.column);
+    setdeletedOption(updateFilteredPlanets);
+    setFilteredNumber({
+      ...filteredNumber,
+      column: updateFilteredPlanets[0],
+      buttonClick: true,
+      numberFilter: planetsFiltered,
+    });
   };
 
   const values = {
@@ -70,6 +94,7 @@ function PlanetProvider({ children }) {
     input,
     filteredNumber,
     handleClick,
+    selectedOptions,
     setInput: ({ target }) => setInput(target.value),
   };
 
