@@ -1,79 +1,114 @@
-import { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import CreateContext from '../context/CreateContext';
 
 function Table() {
-  const context = useContext(CreateContext);
-  const { filtered, handleChange, input,
-    setInput, filteredNumber, handleClick, selectedOptions } = context;
+  const { planetAPI } = useContext(CreateContext);
+
+  const [planetName, setplanetName] = useState('');
+  const [filteredPlanets, setfilteredPlanets] = useState([]);
+
+  const [columnFilter, setcolumnFilter] = useState('population');
+  const [operatorFilter, setoperatorFilter] = useState('maior que');
+  const [NumberFilter, setNumberFilter] = useState(0);
+
+  useEffect(() => {
+    const filterPlanetsByName = planetAPI.filter((planet) => planet.name
+      .toLowerCase().includes(planetName));
+    setfilteredPlanets(filterPlanetsByName);
+  }, [planetName, planetAPI]);
+
+  const handleButtonFilter = () => {
+    let multipleFilters = [];
+    if (operatorFilter === 'maior que') {
+      planetAPI
+        .filter((planet) => +(planet[columnFilter])
+        > +(NumberFilter) && multipleFilters.push(planet));
+    } else if (operatorFilter === 'menor que') {
+      planetAPI
+        .filter((planet) => +(planet[columnFilter])
+        < +(NumberFilter) && multipleFilters.push(planet));
+    } else {
+      multipleFilters = filteredPlanets
+        .filter((planet) => +(planet[columnFilter])
+        === +(NumberFilter) && multipleFilters.push(planet));
+    }
+    setfilteredPlanets(multipleFilters);
+
+    // Removendo elemento da coluna de pesquisa:
+    document.getElementById(columnFilter).remove();
+    setcolumnFilter(document.getElementById('column-filter').firstChild.value);
+  };
+
+  const handleInputChange = ({ target }) => {
+    const { value } = target;
+    setplanetName(value);
+  };
+
+  const handleColumnChanges = ({ target }) => {
+    const { value } = target;
+    setcolumnFilter(value);
+  };
+  const handleOperatorChanges = ({ target }) => {
+    const { value } = target;
+    setoperatorFilter(value);
+  };
+  const handleNumberChanges = ({ target }) => {
+    const { value } = target;
+    setNumberFilter(value);
+  };
 
   return (
-    <>
-      <div>
-        <input
-          type="text"
-          data-testid="name-filter"
-          placeholder="Buscar por planetas"
-          value={ input }
-          onChange={ setInput }
-        />
+    <div>
+      <input
+        data-testid="name-filter"
+        type="text"
+        onChange={ handleInputChange }
+      />
 
-        <label htmlFor="column">
-          Coluna
-          <select
-            name="column"
-            id="column"
-            data-testid="column-filter"
-            value={ filteredNumber.column }
-            onChange={ handleChange }
-          >
-            <option value="population">population</option>
-            <option value="orbital_period">orbital_period</option>
-            <option value="diameter">diameter</option>
-            <option value="rotation_period">rotation_period</option>
-            <option value="surface_water">surface_water</option>
-          </select>
-        </label>
-
-        <label htmlFor="comparison">
-          Operador
-          <select
-            name="comparison"
-            id="comparison"
-            data-testid="comparison-filter"
-            value={ filteredNumber.comparison }
-            onChange={ handleChange }
-          >
-            <option value="maior que">maior que</option>
-            <option value="menor que">menor que</option>
-            <option value="igual a">igual a</option>
-          </select>
-        </label>
-
-        <input
-          type="number"
-          name="numberInput"
-          value={ filteredNumber.numberInput }
-          data-testid="value-filter"
-          onChange={ handleChange }
-        />
-
-        <button
-          type="button"
-          data-testid="button-filter"
-          onClick={ handleClick }
+      <label htmlFor="column-filter">
+        Coluna
+        <select
+          data-testid="column-filter"
+          name="column-filter"
+          onChange={ handleColumnChanges }
+          id="column-filter"
         >
-          Filtrar
-        </button>
-      </div>
-      <div>
-        {
-          selectedOptions.map((option, index) => (
-            <div key={ index }>
-              { `${option.column} ${option.comparison} ${option.numberInput}` }
-            </div>
-          ))
-        }
-      </div>
+          <option value="population" id="population">population</option>
+          <option value="orbital_period" id="orbital_period">orbital_period</option>
+          <option value="diameter" id="diameter">diameter</option>
+          <option value="rotation_period" id="rotation_period">rotation_period</option>
+          <option value="surface_water" id="surface_water">surface_water</option>
+        </select>
+      </label>
+
+      <label htmlFor="comparison-filter">
+        Operador
+        <select
+          data-testid="comparison-filter"
+          name="comparison-filter"
+          onChange={ handleOperatorChanges }
+        >
+          <option id="maior que" value="maior que">maior que</option>
+          <option id="menor que" value="menor que">menor que</option>
+          <option id="igual a" value="igual a">igual a</option>
+        </select>
+      </label>
+
+      <input
+        data-testid="value-filter"
+        type="number"
+        onChange={ handleNumberChanges }
+        value={ NumberFilter }
+      />
+
+      <button
+        data-testid="button-filter"
+        type="button"
+        onClick={ handleButtonFilter }
+      >
+        Filtrar
+      </button>
 
       <table>
         <thead>
@@ -93,48 +128,32 @@ function Table() {
             <th>URL</th>
           </tr>
         </thead>
-        { !filteredNumber.buttonClick
-          ? (filtered.map((planet) => (
-            <tbody key={ planet.name }>
-              <tr>
-                <td>{planet.name}</td>
-                <td>{planet.rotation_period}</td>
-                <td>{planet.orbital_period}</td>
-                <td>{planet.diameter}</td>
-                <td>{planet.climate}</td>
-                <td>{planet.gravity}</td>
-                <td>{planet.terrain}</td>
-                <td>{planet.surface_water}</td>
-                <td>{planet.population}</td>
-                <td>{planet.films}</td>
-                <td>{planet.created}</td>
-                <td>{planet.edited}</td>
-                <td>{planet.url}</td>
-              </tr>
-            </tbody>
-          ))) : (filteredNumber.numberFilter.map((planet) => (
-            <tbody key={ planet.name }>
-              <tr>
-                <td>{planet.name}</td>
-                <td>{planet.rotation_period}</td>
-                <td>{planet.orbital_period}</td>
-                <td>{planet.diameter}</td>
-                <td>{planet.climate}</td>
-                <td>{planet.gravity}</td>
-                <td>{planet.terrain}</td>
-                <td>{planet.surface_water}</td>
-                <td>{planet.population}</td>
-                <td>{planet.films}</td>
-                <td>{planet.created}</td>
-                <td>{planet.edited}</td>
-                <td>{planet.url}</td>
-              </tr>
-            </tbody>
-          )))}
-        ;
+        <tbody>
+          {filteredPlanets.map((planet) => (
+            <tr key={ planet.name }>
+              <td data-testid="planets-name">{planet.name}</td>
+              <td>{planet.rotation_period}</td>
+              <td>{planet.orbital_period}</td>
+              <td>{planet.diameter}</td>
+              <td>{planet.climate}</td>
+              <td>{planet.gravity}</td>
+              <td>{planet.terrain}</td>
+              <td>{planet.surface_water}</td>
+              <td>{planet.population}</td>
+              <td>{planet.films}</td>
+              <td>{planet.created}</td>
+              <td>{planet.edited}</td>
+              <td>{planet.url}</td>
+            </tr>
+          ))}
+        </tbody>
       </table>
-    </>
+    </div>
   );
 }
+
+Table.propTypes = {
+  planetAPI: PropTypes.arrayOf(PropTypes.objectOf),
+}.isRequired;
 
 export default Table;
