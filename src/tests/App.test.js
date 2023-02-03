@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from '../App';
-import PlanetsAPImock from '../mocks/PlanetsAPImock';
+import testData from '../../cypress/mocks/testData';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import PlanetProvider from '../context/PlanetProvider';
@@ -11,7 +11,7 @@ describe('Teste a página  <App.js />', () => {
   beforeEach(() => {
     jest.spyOn(global, "fetch");
     global.fetch.mockResolvedValue({
-      json: jest.fn().mockResolvedValue(PlanetsAPImock),
+      json: jest.fn().mockResolvedValue(testData),
     });
   }) 
 
