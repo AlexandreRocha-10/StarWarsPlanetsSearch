@@ -5,6 +5,8 @@ import CreateContext from './CreateContext';
 function PlanetProvider({ children }) {
   const [planetAPI, setplanetAPI] = useState([]);
 
+  let tableHead = [];
+
   useEffect(() => {
     const fetchAPI = async () => {
       const response = await fetch('https://swapi.dev/api/planets');
@@ -14,8 +16,12 @@ function PlanetProvider({ children }) {
     fetchAPI();
   }, []);
 
+  if (planetAPI.length > 0) {
+    tableHead = Object.keys(planetAPI[0]);
+  }
+
   return (
-    <CreateContext.Provider value={ { planetAPI } }>
+    <CreateContext.Provider value={ { planetAPI, tableHead } }>
       {children}
     </CreateContext.Provider>
   );
